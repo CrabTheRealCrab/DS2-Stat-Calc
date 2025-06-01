@@ -284,11 +284,24 @@ export class Calculator {
                 base.weights.attunement += 0.2;
                 base.weights.endurance += 0.2;
                 break;
-            case 'damage':
-                base.weights.vigor -= 0.6;
-                base.weights.vitality -= 0.2;
-                base.weights.adaptability -= 0.1;
-                break;
+                case 'damage':
+                    base.weights.vigor -= 0.4;
+                    base.weights.vitality -= 0.2;
+                    base.weights.adaptability -= 0.1;
+                    // Boost offensive stats by playstyle:
+                    if (['barbarian', 'knight', 'defender', 'mage_barbarian', 'paladin', 'pyro_physical', 'hexer_physical'].includes(playstyle)) {
+                        base.weights.strength += 0.5;
+                    }
+                    if (['swordsman', 'knight', 'magic_swordsman', 'mage_barbarian', 'paladin', 'faith_dex', 'hexer_physical', 'pyro_physical'].includes(playstyle)) {
+                        base.weights.dexterity += 0.5;
+    }
+                    if (['mage', 'hexer', 'magic_swordsman', 'mage_barbarian', 'hexer_physical', 'pyromancer', 'pyro_physical'].includes(playstyle)) {
+                        base.weights.intelligence += 0.5;
+                        }
+                    if (['priest', 'hexer', 'paladin', 'faith_dex', 'hexer_physical', 'pyromancer', 'pyro_physical'].includes(playstyle)) {
+                        base.weights.faith += 0.5;
+                    }
+                    break;
             case 'versatility':
                 base.weights.vigor += 0.1;
                 base.weights.vitality += 0.1;
