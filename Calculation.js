@@ -272,7 +272,7 @@ export class Calculator {
         // Priority adjustments
         switch (priority) {
             case 'survivability':
-                base.weights.vigor += 0.5;
+                base.weights.vigor += 0.9;
                 base.weights.vitality += 0.4;
                 base.weights.adaptability -= 0.4;
                 base.weights.endurance += 0.2;
