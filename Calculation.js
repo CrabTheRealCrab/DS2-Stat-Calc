@@ -1,8 +1,8 @@
-// Calculation.js
 export class Calculator {
     constructor(dataStore) {
         this.dataStore = dataStore;
         this.STAT_CAPS = this.dataStore.getStatCaps();
+        this.BASE_STAT_TOTAL = 54; // Level 1 is always 54 stats invested (Deprived: 6*9)
     }
 
     calculateAgility(adaptability, attunement) {
@@ -59,80 +59,113 @@ export class Calculator {
         }));
     }
 
-    // MAIN DISTRIBUTION LOGIC, modeled after your working HTML example
-    distributeStats(startingStats, availablePoints, playstyle, priority) {
+    /**
+     * Allocate stats to reach a TARGET LEVEL (levelCap).
+     * This method ensures that final stats sum to (BASE_STAT_TOTAL + levelCap - 1)
+     * regardless of starting class.
+     */
+    distributeStats(startingStats, levelCap, playstyle, priority) {
+        // Always start from a fresh copy of starting stats
         let distribution = { ...startingStats };
-        let remaining = availablePoints;
-
-        // Minimum requirements first
         const requirements = this.getPlaystyleRequirements(playstyle, priority);
 
+        // 1. Set minimum requirements (never decrease below starting stats)
         for (let stat in requirements.minimums) {
             const needed = Math.max(0, requirements.minimums[stat] - distribution[stat]);
             if (needed > 0) {
                 distribution[stat] += needed;
-                remaining -= needed;
             }
         }
 
-        // Priority: get Vigor, Adaptability, Endurance to reasonable levels first
-        remaining = this.prioritizeVitalStats(distribution, remaining);
+        // 2. Now, repeatedly allocate points by priority/weights until we reach the correct stat sum for levelCap
+        //   total stats at levelCap = BASE_STAT_TOTAL + (levelCap - 1)
+        const targetStatSum = this.BASE_STAT_TOTAL + (levelCap - 1);
 
-        // Then distribute based on weights, soft caps, and efficiency
+        // 3. Count current stat sum (after minimums)
+        let currentStatSum = Object.values(distribution).reduce((a, b) => a + b, 0);
+
+        // 4. Priority: get Vigor, Adaptability, Endurance to reasonable levels first, but not past targetStatSum
+        let pointsToAllocate = targetStatSum - currentStatSum;
+        if (pointsToAllocate > 0) {
+            pointsToAllocate = this.prioritizeVitalStats(distribution, pointsToAllocate, targetStatSum);
+        }
+
+        // 5. Distribute by weights, soft caps, and efficiency, never exceeding targetStatSum
         const weights = this.groupStatsByWeight(requirements.weights);
 
-        while (remaining > 0) {
+        while (true) {
             let pointsSpent = 0;
+            let statSum = Object.values(distribution).reduce((a, b) => a + b, 0);
+            let pointsLeft = targetStatSum - statSum;
+            if (pointsLeft <= 0) break;
 
             for (const group of weights) {
-                if (remaining <= 0) break;
+                if (pointsLeft <= 0) break;
 
                 // Try to bring highest weight stats to their soft caps
                 if (group.weight >= 1.0) {
-                    pointsSpent += this.distributeToSoftCaps(distribution, group.stats, remaining);
-                    remaining -= pointsSpent;
-                    if (pointsSpent > 0) continue; // If points spent, start loop over
+                    const spent = this.distributeToSoftCaps(distribution, group.stats, pointsLeft);
+                    pointsSpent += spent;
+                    statSum = Object.values(distribution).reduce((a, b) => a + b, 0);
+                    pointsLeft = targetStatSum - statSum;
+                    if (spent > 0) continue; // If points spent, start loop over
                 }
 
                 // Then distribute evenly among stats of the same weight
-                const groupPointsSpent = this.distributeEvenly(distribution, group.stats, Math.min(remaining, group.stats.length * 5));
+                const groupPointsSpent = this.distributeEvenly(distribution, group.stats, Math.min(pointsLeft, group.stats.length * 5), targetStatSum);
                 pointsSpent += groupPointsSpent;
-                remaining -= groupPointsSpent;
+                statSum = Object.values(distribution).reduce((a, b) => a + b, 0);
+                pointsLeft = targetStatSum - statSum;
             }
 
-            if (pointsSpent === 0) break; // No more efficient stats to raise
+            if (pointsSpent === 0) break; // No more efficient stats to raise or statSum reached
+        }
+
+        // 6. Final clamp: never let any stat fall below starting value
+        for (let stat in distribution) {
+            if (distribution[stat] < startingStats[stat]) {
+                distribution[stat] = startingStats[stat];
+            }
         }
 
         return distribution;
     }
 
-    // Bring Vigor and Adaptability and Endurance to a reasonable level first
-    prioritizeVitalStats(distribution, points) {
+    /**
+     * Prioritize leveling Vigor, Adaptability, Endurance to reasonable levels first,
+     * but never raise total stats above targetStatSum.
+     */
+    prioritizeVitalStats(distribution, points, targetStatSum) {
         let remaining = points;
         const vigorTarget = Math.min(20, Math.floor(points * 0.13) + distribution.vigor);
         const adaptabilityTarget = Math.min(20, Math.floor(points * 0.14) + distribution.adaptability);
         const enduranceTarget = Math.min(20, Math.floor(points * 0.05) + distribution.endurance);
 
         while (distribution.vigor < vigorTarget && remaining > 0 && this.getStatEfficiency('vigor', distribution.vigor) >= 0.5) {
+            if (this._statSum(distribution) >= targetStatSum) break;
             distribution.vigor++;
             remaining--;
         }
         while (distribution.adaptability < adaptabilityTarget && remaining > 0 && this.getStatEfficiency('adaptability', distribution.adaptability) >= 0.5) {
+            if (this._statSum(distribution) >= targetStatSum) break;
             distribution.adaptability++;
             remaining--;
         }
         while (distribution.endurance < enduranceTarget && remaining > 0 && this.getStatEfficiency('endurance', distribution.endurance) >= 0.5) {
+            if (this._statSum(distribution) >= targetStatSum) break;
             distribution.endurance++;
             remaining--;
         }
         while (remaining > 0 && (distribution.vigor < 30 || distribution.adaptability < 20)) {
             let pointsThisRound = 0;
             if (distribution.vigor < 30 && this.getStatEfficiency('vigor', distribution.vigor) >= 0.5) {
+                if (this._statSum(distribution) >= targetStatSum) break;
                 distribution.vigor++;
                 remaining--;
                 pointsThisRound++;
             }
             if (remaining > 0 && distribution.adaptability < 20 && this.getStatEfficiency('adaptability', distribution.adaptability) >= 0.5) {
+                if (this._statSum(distribution) >= targetStatSum) break;
                 distribution.adaptability++;
                 remaining--;
                 pointsThisRound++;
@@ -156,7 +189,7 @@ export class Calculator {
             .sort((a, b) => b.weight - a.weight);
     }
 
-    // Distribute to soft caps for high-weight stats
+    // Distribute to soft caps for high-weight stats, but don't exceed targetStatSum
     distributeToSoftCaps(distribution, stats, maxPoints) {
         let pointsSpent = 0;
         for (let stat of stats) {
@@ -174,8 +207,8 @@ export class Calculator {
         return pointsSpent;
     }
 
-    // Distribute remaining points evenly among group, respecting diminishing returns
-    distributeEvenly(distribution, stats, maxPoints) {
+    // Distribute remaining points evenly among group, respecting diminishing returns and not exceeding targetStatSum
+    distributeEvenly(distribution, stats, maxPoints, targetStatSum) {
         let pointsSpent = 0;
         let availableStats = [...stats];
         while (pointsSpent < maxPoints && availableStats.length > 0) {
@@ -186,6 +219,7 @@ export class Calculator {
                 const currentValue = distribution[stat];
                 const efficiency = this.getStatEfficiency(stat, currentValue);
                 if (efficiency >= 0.1) {
+                    if (this._statSum(distribution) >= targetStatSum) break;
                     distribution[stat]++;
                     pointsSpent++;
                     roundPointsSpent++;
@@ -203,6 +237,11 @@ export class Calculator {
         if (value < soft) return 1.0;
         if (value < hard) return 0.5;
         return 0.1;
+    }
+
+    // Utility: sum of all stats
+    _statSum(statsObj) {
+        return Object.values(statsObj).reduce((a, b) => a + b, 0);
     }
 
     // Playstyle/priority logic: copy from your working HTML or Datastore as needed
