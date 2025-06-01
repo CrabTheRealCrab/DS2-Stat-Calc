@@ -48,8 +48,7 @@ export class UIManager {
         }
 
         const startingStats = this.startingClass.stats;
-        const availablePoints = levelCap - this.startingClass.startingLevel;
-        const finalStats = this.calculator.distributeStats(startingStats, availablePoints, playstyle, priority);
+        const finalStats = this.calculator.distributeStats(startingStats, levelCap, playstyle, priority);
         const agility = this.calculator.calculateAgility(finalStats.adaptability, finalStats.attunement);
         const iframes = this.calculator.getIFrames(agility);
 
