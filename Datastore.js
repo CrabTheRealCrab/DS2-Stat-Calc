@@ -4,19 +4,43 @@ export class DataStore {
             deprived: {
                 name: "Deprived",
                 startingLevel: 1,
-                stats: {
-                    vigor: 6,
-                    endurance: 6,
-                    vitality: 6,
-                    adaptability: 6,
-                    strength: 6,
-                    dexterity: 6,
-                    intelligence: 6,
-                    faith: 6,
-                    attunement: 6
-                }
+                stats: { vigor: 6, endurance: 6, vitality: 6, adaptability: 6, strength: 6, dexterity: 6, intelligence: 6, faith: 6, attunement: 6 }
             },
-            // Add other classes as needed
+            warrior: {
+                name: "Warrior",
+                startingLevel: 12,
+                stats: { vigor: 7, endurance: 6, vitality: 6, adaptability: 5, strength: 15, dexterity: 11, intelligence: 5, faith: 5, attunement: 5 }
+            },
+            knight: {
+                name: "Knight",
+                startingLevel: 13,
+                stats: { vigor: 12, endurance: 6, vitality: 7, adaptability: 9, strength: 11, dexterity: 8, intelligence: 3, faith: 6, attunement: 4 }
+            },
+            swordsman: {
+                name: "Swordsman",
+                startingLevel: 12,
+                stats: { vigor: 4, endurance: 8, vitality: 4, adaptability: 6, strength: 9, dexterity: 16, intelligence: 7, faith: 5, attunement: 6 }
+            },
+            bandit: {
+                name: "Bandit",
+                startingLevel: 11,
+                stats: { vigor: 9, endurance: 7, vitality: 11, adaptability: 3, strength: 9, dexterity: 14, intelligence: 1, faith: 8, attunement: 2 }
+            },
+            cleric: {
+                name: "Cleric",
+                startingLevel: 14,
+                stats: { vigor: 10, endurance: 3, vitality: 8, adaptability: 4, strength: 11, dexterity: 5, intelligence: 4, faith: 12, attunement: 10 }
+            },
+            sorcerer: {
+                name: "Sorcerer",
+                startingLevel: 11,
+                stats: { vigor: 5, endurance: 6, vitality: 5, adaptability: 8, strength: 3, dexterity: 7, intelligence: 14, faith: 4, attunement: 12 }
+            },
+            explorer: {
+                name: "Explorer",
+                startingLevel: 10,
+                stats: { vigor: 7, endurance: 6, vitality: 9, adaptability: 12, strength: 6, dexterity: 6, intelligence: 5, faith: 5, attunement: 7 }
+            }
         };
 
         this.statCaps = {
