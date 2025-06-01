@@ -69,6 +69,13 @@ export class Calculator {
         let distribution = { ...startingStats };
         const requirements = this.getPlaystyleRequirements(playstyle, priority);
 
+        // Defensive: ensure requirements is never undefined
+        if (!requirements || typeof requirements.minimums === "undefined") {
+            throw new Error(
+                `getPlaystyleRequirements returned undefined or missing minimums. playstyle="${playstyle}", priority="${priority}"`
+            );
+        }
+
         // 1. Set minimum requirements (never decrease below starting stats)
         for (let stat in requirements.minimums) {
             const needed = Math.max(0, requirements.minimums[stat] - distribution[stat]);
@@ -245,7 +252,7 @@ export class Calculator {
     }
 
     // Playstyle/priority logic: copy from your working HTML or Datastore as needed
-getPlaystyleRequirements(playstyle, priority) {
+    getPlaystyleRequirements(playstyle, priority) {
         // This should match your HTML's getPlaystyleRequirements (for consistency)
         const base = {
             minimums: {},
@@ -405,6 +412,7 @@ getPlaystyleRequirements(playstyle, priority) {
                 base.weights.attunement = 0.8;
                 break;
         }
+        // Always return base: ensures requirements is never undefined
         return base;
     }
 }
