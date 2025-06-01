@@ -286,7 +286,7 @@ export class Calculator {
                 base.weights.endurance += 0.2;
                 break;
             case 'damage':
-                base.weights.vigor -= 0.4;
+                base.weights.vigor -= 0.6;
                 base.weights.vitality -= 0.2;
                 base.weights.adaptability -= 0.1;
                 break;
@@ -307,6 +307,8 @@ export class Calculator {
                 base.weights.endurance = 0.8;
                 base.weights.vitality = 0.5;
                 base.weights.vigor = 0.9;
+                base.weights.intelligence = 0.0;
+                base.weights.faith = 0.0;
                 break;
             case 'swordsman':
                 base.minimums = { vigor: 10, dexterity: 10, endurance: 10, adaptability: 10 };
@@ -314,6 +316,8 @@ export class Calculator {
                 base.weights.strength = 0.6;
                 base.weights.endurance = 0.9;
                 base.weights.vigor = 0.9;
+                base.weights.intelligence = 0.0;
+                base.weights.faith = 0.0;
                 break;
             case 'knight':
                 base.minimums = { vigor: 10, strength: 10, dexterity: 10, endurance: 10, adaptability: 10 };
@@ -322,6 +326,8 @@ export class Calculator {
                 base.weights.endurance = 0.8;
                 base.weights.vitality = 0.5;
                 base.weights.vigor = 1.0;
+                base.weights.intelligence = 0.0;
+                base.weights.faith = 0.0;
                 break;
             case 'defender':
                 base.minimums = { vigor: 10, vitality: 10, strength: 10, endurance: 10 };
@@ -331,6 +337,8 @@ export class Calculator {
                 base.weights.vigor = 1.3;
                 base.weights.vitality = 0.7;
                 base.weights.adaptability = 0.4;
+                base.weights.intelligence = 0.0;
+                base.weights.faith = 0.0;
                 break;
             case 'priest':
                 base.minimums = { vigor: 10, faith: 10, attunement: 10, adaptability: 10 };
