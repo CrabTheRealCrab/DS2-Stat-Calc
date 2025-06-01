@@ -350,7 +350,7 @@ export class Calculator {
                 base.minimums = { vigor: 10, intelligence: 10, faith: 10, attunement: 10, adaptability: 10 };
                 base.weights.intelligence = 1.3;
                 base.weights.faith = 1.3;
-                base.weights.attunement = 1.0;
+                base.weights.attunement = 0.9;
                 base.weights.strength = 0.3;
                 base.weights.dexterity = 0.3;
                 break;
@@ -392,23 +392,6 @@ export class Calculator {
                 base.weights.faith = 0.9;
                 base.weights.strength = 0.8;
                 base.weights.dexterity = 0.8;
-                base.weights.attunement = 0.8;
-                break;
-            case 'pyromancer':
-                base.minimums = { vigor: 10, intelligence: 10, faith: 10, attunement: 10, adaptability: 10 };
-                base.weights.intelligence = 1.3;
-                base.weights.faith = 1.3;
-                base.weights.attunement = 1.0;
-                base.weights.strength = 0.3;
-                base.weights.dexterity = 0.3;
-                break;
-            case 'pyro_physical':
-                base.minimums = { vigor: 10, intelligence: 10, faith: 10, strength: 10, dexterity: 10, adaptability: 10 };
-                base.weights.intelligence = 0.9;
-                base.weights.faith = 0.9;
-                base.weights.strength = 0.8;
-                base.weights.dexterity = 0.8;
-                base.weights.endurance = 0.8;
                 base.weights.attunement = 0.8;
                 break;
         }
